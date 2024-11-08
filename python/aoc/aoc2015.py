@@ -1,15 +1,15 @@
 import unittest
+import typing
 import functools
-from typing import Optional
-from enum import Enum
+import enum
 
 
-class Token(Enum):
+class Token(enum.Enum):
     Open = '('
     Close = ')'
 
 
-def one(input: str) -> tuple[int, Optional[int]]:
+def one(input: str) -> tuple[int, typing.Optional[int]]:
     def parse_char(c: str) -> Token:
         if c == '(':
             return Token.Open
@@ -18,7 +18,7 @@ def one(input: str) -> tuple[int, Optional[int]]:
         else:
             raise ValueError(f"picoprobpy: invalid char {c}")
 
-    def solve(acc: tuple[int, Optional[int]], next: tuple[int, Token]) -> tuple[int, Optional[int]]:
+    def solve(acc: tuple[int, typing.Optional[int]], next: tuple[int, Token]) -> tuple[int, typing.Optional[int]]:
         floor, first_floor_neg = acc
         i, token = next
         match token:
@@ -40,7 +40,7 @@ def one(input: str) -> tuple[int, Optional[int]]:
 
 
 class TestAOC2015(unittest.TestCase):
-    def test_one(self):
+    def test(self):
         self.assertEqual(one("(())")[0], 0)
         self.assertEqual(one("()()")[0], 0)
         self.assertEqual(one("(((")[0], 3)
