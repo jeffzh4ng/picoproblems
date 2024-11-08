@@ -108,11 +108,4 @@ mod tests {
         let output = one(input).unwrap();
         assert_eq!(output.1, Some(5))
     }
-
-    // #[test]
-    // fn test_six() {
-    //     let input = "()())";
-    //     let output = one(input).unwrap();
-    //     assert_eq!(output.1, 5)
-    // }
 }
