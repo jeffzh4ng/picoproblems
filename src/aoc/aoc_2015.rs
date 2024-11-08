@@ -18,18 +18,38 @@ impl TryFrom<char> for Token {
     }
 }
 
-pub fn one(input: &str) -> Result<i32, io::Error> {
+/// one takes in a list of up/down commands encoded as parenthesis
+/// and produces (final floor * first floor to reach -1)
+///
+/// # Examples
+/// ```
+/// use picoprob::aoc::aoc_2015;
+/// let input = ")))";
+/// let output = aoc_2015::one(&input).unwrap();
+/// assert_eq!(output, (-3, Some(1)));
+/// ```
+pub fn one(input: &str) -> Result<(i32, Option<usize>), io::Error> {
     // parse: &str -> Vec<Token>
     // count: Vec<Token> -> i32
     let output = input
         .chars()
         .map(|c| Token::try_from(c))
         .collect::<Result<Vec<_>, _>>()
-        .map_err(|foo| io::Error::new(io::ErrorKind::InvalidData, "picoprob: invalid data"))?
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "picoprob: invalid data"))?
         .iter()
-        .fold(0, |acc, next| match next {
-            Token::Open => acc + 1,
-            Token::Close => acc - 1,
+        .enumerate()
+        .fold((0, None), |(floor, first_floor_neg), (i, cmd)| match cmd {
+            Token::Open => (floor + 1, first_floor_neg),
+            Token::Close => match first_floor_neg {
+                Some(_) => (floor - 1, first_floor_neg),
+                None => {
+                    if floor == 0 {
+                        (floor - 1, Some(i + 1)) // weird indexing
+                    } else {
+                        (floor - 1, None)
+                    }
+                }
+            },
         });
 
     Ok(output)
@@ -41,37 +61,58 @@ mod tests {
 
     #[test]
     fn test_one() {
-        let inps = vec!["(())", "()()"];
-        inps.iter().for_each(|&inp| {
-            let out = one(inp).unwrap();
-            assert_eq!(out, 0);
+        let inputs = vec!["(())", "()()"];
+        inputs.iter().for_each(|&input| {
+            let out = one(input).unwrap();
+            assert_eq!(out.0, 0);
         });
     }
 
     #[test]
     fn test_two() {
-        let inps = vec!["(((", "(()(()(", "))((((("];
-        inps.iter().for_each(|&inp| {
-            let out = one(inp).unwrap();
-            assert_eq!(out, 3);
+        let inputs = vec!["(((", "(()(()(", "))((((("];
+        inputs.iter().for_each(|&input| {
+            let out = one(input).unwrap();
+            assert_eq!(out.0, 3);
         });
     }
 
     #[test]
     fn test_three() {
-        let inps = vec!["())", "))("];
-        inps.iter().for_each(|&inp| {
-            let out = one(inp).unwrap();
-            assert_eq!(out, -1);
+        let inputs = vec!["())", "))("];
+        inputs.iter().for_each(|&input| {
+            let out = one(input).unwrap();
+            assert_eq!(out.0, -1);
         });
     }
 
     #[test]
     fn test_four() {
-        let inps = vec![")))", ")())())"];
-        inps.iter().for_each(|&inp| {
-            let out = one(inp).unwrap();
-            assert_eq!(out, -3);
+        let inputs = vec![")))", ")())())"];
+        inputs.iter().for_each(|&input| {
+            let out = one(input).unwrap();
+            assert_eq!(out.0, -3);
         });
     }
+
+    #[test]
+    fn test_five() {
+        let input = ")";
+        let output = one(input).unwrap();
+        assert_eq!(output.1, Some(1))
+    }
+
+    #[test]
+    fn test_six() {
+        let input = "()())";
+        let output = one(input).unwrap();
+        assert_eq!(output.1, Some(5))
+    }
+
+    // #[test]
+    // fn test_six() {
+    //     let input = "()())";
+    //     let output = one(input).unwrap();
+    //     assert_eq!(output.1, 5)
+    // }
 }
