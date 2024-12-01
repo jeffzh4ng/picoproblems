@@ -1,9 +1,9 @@
 use std::fs;
 
-use picoprob::aoc::aoc_2015;
+use picoprob::aoc::aoc_2024;
 
 fn main() {
-    let input = fs::read_to_string("./src/aoc/data/2015_1").unwrap();
-    let output = aoc_2015::one(&input).unwrap();
+    let input = fs::read_to_string("./src/aoc/data/2024_1").unwrap();
+    let output = aoc_2024::one(&input);
     println!("{:?}", output);
 }
