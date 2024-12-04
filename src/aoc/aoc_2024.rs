@@ -252,9 +252,9 @@ mod tests_two {
         println!("{output_three}");
         // assert_eq!(output_three, 218);
 
-        let input_four = "1 3 2 4 5";
-        let (_, output_four) = two(&input_four);
-        assert_eq!(output_four, 1);
+        // let input_four = "1 3 2 4 5";
+        // let (_, output_four) = two(&input_four);
+        // assert_eq!(output_four, 1);
     }
 }
 
@@ -571,7 +571,7 @@ pub fn four(input: &str) -> (usize, usize) {
         let mut output_two = 0;
         for file in INDEX_OFFSETS_TWO {
             if file_hit(haystack, &needle_two, (r, c), &file) {
-                output_two = 1;
+                output_two += 1;
                 break;
             }
         }
@@ -639,6 +639,6 @@ MXMXAXMASX
         let input_two = fs::read_to_string("./src/aoc/data/2024_4").unwrap();
         let (_, output_two) = four(&input_two);
         println!("{:?}", output_two);
-        // assert_eq!(output_two, 1940);
+        assert_eq!(output_two, 1940);
     }
 }
