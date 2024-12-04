@@ -488,3 +488,157 @@ mod tests_three {
         // assert_eq!(output_two, 175700056);
     }
 }
+
+pub fn four(input: &str) -> (usize, usize) {
+    fn file_hit(
+        haystack: &Vec<Vec<char>>,
+        needle: &[char],
+        (r, c): (usize, usize),
+        file: &[(i32, i32)],
+    ) -> bool {
+        let mut file_hit = true;
+        for (i, (r_offset, c_offset)) in file.iter().enumerate() {
+            let out_of_bounds = (r as i32 + r_offset) < 0 // no usize cast. panics in debug. wraps in release.
+                || (r as i32 + r_offset) as usize >= haystack.len()
+                || (c as i32 + c_offset) < 0 // no usize cast. panics in debug. wraps in release.
+                || (c as i32 + c_offset) as usize >= haystack[0].len();
+
+            if !out_of_bounds {
+                let (new_r, new_c) = (
+                    (r as i32 + r_offset) as usize,
+                    (c as i32 + c_offset) as usize,
+                );
+
+                if haystack[new_r][new_c] != needle[i] {
+                    file_hit = false;
+                    break;
+                }
+            } else {
+                file_hit = false;
+                break;
+            }
+        }
+
+        file_hit
+    }
+
+    fn hits(haystack: &Vec<Vec<char>>, (r, c): (usize, usize)) -> (usize, usize) {
+        // only searches starting from X to avoid double counting
+        const INDEX_OFFSETS_ONE: [[(i32, i32); 4]; 8] = [
+            [(0, 0), (1, 0), (2, 0), (3, 0)],       // north
+            [(0, 0), (-1, 0), (-2, 0), (-3, 0)],    // south
+            [(0, 0), (0, 1), (0, 2), (0, 3)],       // east
+            [(0, 0), (0, -1), (0, -2), (0, -3)],    // west
+            [(0, 0), (1, 1), (2, 2), (3, 3)],       // north east
+            [(0, 0), (-1, 1), (-2, 2), (-3, 3)],    // south east
+            [(0, 0), (1, -1), (2, -2), (3, -3)],    // north west
+            [(0, 0), (-1, -1), (-2, -2), (-3, -3)], // south west
+        ];
+        const INDEX_OFFSETS_TWO: [[(i32, i32); 5]; 6] = [
+            // |permutations(MSMS) = permutations(MM)| = 4*3
+            // combinations = (4*3)choose2 --> M_sally, M_bob are considered same.
+            // M: top left
+            // M M           M S       M S
+            // S S           M S       S M
+            [(0, 0), (1, -1), (1, 1), (-1, -1), (-1, 1)],
+            [(0, 0), (1, -1), (-1, -1), (1, 1), (-1, 1)],
+            [(0, 0), (1, -1), (-1, 1), (1, 1), (-1, -1)],
+            // M: top right
+            // M M (covered)  S M       S M
+            // S S            M S       S M
+            [(0, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)],
+            [(0, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)],
+            // M: bottom right
+            // M S (covered)  S M (covered)   S S
+            // S M            S M             M M
+            [(0, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)],
+            // M: bottom left
+            // M S (covered)    S M (covered)   S S (covered)
+            // M S              M S             M M
+        ];
+        let needle_one = "XMAS".chars().collect::<Vec<_>>();
+        let needle_two = "AMMSS".chars().collect::<Vec<_>>();
+
+        // one
+        let mut output_one = 0;
+        for file in INDEX_OFFSETS_ONE {
+            if file_hit(haystack, &needle_one, (r, c), &file) {
+                output_one += 1;
+            }
+        }
+
+        // two
+        let mut output_two = 0;
+        for file in INDEX_OFFSETS_TWO {
+            if file_hit(haystack, &needle_two, (r, c), &file) {
+                output_two = 1;
+                break;
+            }
+        }
+
+        (output_one, output_two)
+    }
+
+    let grid = input
+        .lines()
+        .map(|l| l.chars().collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+
+    let (n, m) = (grid.len(), grid[0].len());
+    let count = (0..n)
+        .flat_map(|r| (0..m).map(move |c| (r, c)))
+        .map(|(r, c)| hits(&grid, (r, c)))
+        .fold((0, 0), |p, n| (p.0 + n.0, p.1 + n.1));
+
+    count
+}
+
+#[cfg(test)]
+mod tests_four {
+    use std::fs;
+
+    use super::*;
+
+    #[test]
+    fn part_one() {
+        let input = "MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX
+";
+        let (output, _) = four(input);
+        assert_eq!(output, 18);
+
+        let input_two = fs::read_to_string("./src/aoc/data/2024_4").unwrap();
+        let (output_two, _) = four(&input_two);
+        assert_eq!(output_two, 2536);
+    }
+
+    #[test]
+    fn part_two() {
+        let input = "MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX
+";
+        let (_, output) = four(input);
+        assert_eq!(output, 9);
+
+        let input_two = fs::read_to_string("./src/aoc/data/2024_4").unwrap();
+        let (_, output_two) = four(&input_two);
+        println!("{:?}", output_two);
+        // assert_eq!(output_two, 1940);
+    }
+}

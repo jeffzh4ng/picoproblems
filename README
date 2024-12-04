@@ -3,7 +3,7 @@ picoprob: rust solutions to problemsets
 problemsets:
 - advent(8*31=248)
 - grokking(281)
-- leetcode(75+150=225)
+- leetcode(169+150=319)
 - cses(300)
 - usaco(tbd)
-total:248+281+225+300=1054
+total:248+281+319+300=1148
