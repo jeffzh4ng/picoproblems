@@ -240,7 +240,7 @@ mod tests_two {
 1 3 6 7 9
 ";
         let (_, output) = two(input);
-        println!("{:?}", output);
+        // println!("{:?}", output);
         assert_eq!(output, 4);
 
         let input_two = "1 10 9 7";
