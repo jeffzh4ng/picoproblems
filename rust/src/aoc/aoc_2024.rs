@@ -1,7 +1,8 @@
+use core::str;
 use std::{
     cmp::{self, Reverse},
     collections::{BinaryHeap, HashMap},
-    io,
+    io, iter,
 };
 
 pub fn one(input: &str) -> (i128, i128) {
@@ -254,5 +255,236 @@ mod tests_two {
         let input_four = "1 3 2 4 5";
         let (_, output_four) = two(&input_four);
         assert_eq!(output_four, 1);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum TT {
+    Int,
+    Mul,
+    LeftParen,
+    RightParen,
+    Comma,
+    Illegal,
+    Enable,
+    Disable,
+}
+
+#[derive(Debug, PartialEq)]
+struct Token {
+    lexeme: Option<String>,
+    typ: TT,
+}
+
+pub fn three(input: &str) -> (i128, i128) {
+    // mul(X, Y)
+    // X: 1-3 digits
+    // Y: 1-3 digits
+
+    fn lex_op(input: &[char]) -> Option<(Token, usize)> {
+        if (input[0..3].iter().collect::<String>()).as_str() == "mul" {
+            Some((
+                Token {
+                    lexeme: None,
+                    typ: TT::Mul,
+                },
+                3,
+            ))
+        } else if (input[0..4].iter().collect::<String>()).as_str() == "do()" {
+            Some((
+                Token {
+                    lexeme: None,
+                    typ: TT::Enable,
+                },
+                4,
+            ))
+        } else if (input[0..7].iter().collect::<String>()).as_str() == "don't()" {
+            Some((
+                Token {
+                    lexeme: None,
+                    typ: TT::Disable,
+                },
+                7,
+            ))
+        } else {
+            None
+        }
+    }
+
+    fn lex_int(input: &[char]) -> Option<(Token, usize)> {
+        let i = input.iter().take_while(|c| c.is_numeric()).count();
+        if !(1 <= i && i <= 3) {
+            None
+        } else {
+            let n = input[..i].iter().collect::<String>();
+
+            Some((
+                Token {
+                    lexeme: Some(n),
+                    typ: TT::Int,
+                },
+                i,
+            ))
+        }
+    }
+
+    fn lex(input: &[char]) -> Vec<Token> {
+        let mut tokens = Vec::new();
+        let mut pos = 0;
+
+        while pos < input.len() {
+            match input[pos] {
+                '0'..='9' => {
+                    if let Some((token, consumed)) = lex_int(&input[pos..]) {
+                        tokens.push(token);
+                        pos += consumed;
+                    } else {
+                        tokens.push(Token {
+                            lexeme: None,
+                            typ: TT::Illegal,
+                        });
+                        pos += 1;
+                    }
+                }
+                'm' | 'd' => {
+                    if let Some((token, consumed)) = lex_op(&input[pos..]) {
+                        tokens.push(token);
+                        pos += consumed;
+                    } else {
+                        tokens.push(Token {
+                            lexeme: None,
+                            typ: TT::Illegal,
+                        });
+                        pos += 1;
+                    }
+                }
+                '(' => {
+                    tokens.push(Token {
+                        lexeme: None,
+                        typ: TT::LeftParen,
+                    });
+                    pos += 1;
+                }
+                ')' => {
+                    tokens.push(Token {
+                        lexeme: None,
+                        typ: TT::RightParen,
+                    });
+                    pos += 1;
+                }
+                ',' => {
+                    tokens.push(Token {
+                        lexeme: None,
+                        typ: TT::Comma,
+                    });
+                    pos += 1;
+                }
+                _ => {
+                    tokens.push(Token {
+                        lexeme: None,
+                        typ: TT::Illegal,
+                    });
+                    pos += 1;
+                }
+            }
+        }
+
+        tokens
+    }
+
+    fn parse(input: &[Token]) -> (Vec<(i128, i128)>, Vec<(i128, i128)>) {
+        let mut output = Vec::new();
+        let mut output_toggled = Vec::new();
+        let mut i = 0;
+        let mut enabled = true;
+
+        const WIN: [&TT; 6] = [
+            &TT::Mul,
+            &TT::LeftParen,
+            &TT::Int,
+            &TT::Comma,
+            &TT::Int,
+            &TT::RightParen,
+        ];
+
+        while i + 5 < input.len() {
+            // mul(X,Y)
+            let sliding_win: [&TT; 6] = std::array::from_fn(|n| &input[i + n].typ);
+            if sliding_win == WIN {
+                let (x, y) = (
+                    input[i + 2]
+                        .lexeme
+                        .as_ref()
+                        .unwrap()
+                        .parse::<i128>()
+                        .unwrap(),
+                    input[i + 4]
+                        .lexeme
+                        .as_ref()
+                        .unwrap()
+                        .parse::<i128>()
+                        .unwrap(),
+                );
+                output.push((x, y));
+                if enabled {
+                    output_toggled.push((x, y));
+                }
+                i += 6;
+            } else {
+                match input[i].typ {
+                    TT::Enable => enabled = true,
+                    TT::Disable => enabled = false,
+                    _ => (),
+                }
+                i += 1;
+            }
+        }
+
+        (output, output_toggled)
+    }
+
+    let tokens = lex(&input.chars().collect::<Vec<_>>());
+    let mul_ops = parse(&tokens);
+
+    let output = mul_ops
+        .0
+        .iter()
+        .fold(0, |prev, next| prev + (next.0 * next.1));
+
+    let output_toggled = mul_ops
+        .1
+        .iter()
+        .fold(0, |prev, next| prev + (next.0 * next.1));
+
+    (output, output_toggled)
+}
+
+#[cfg(test)]
+mod tests_three {
+    use std::fs;
+
+    use super::*;
+
+    #[test]
+    fn part_one() {
+        let input = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
+        let (output, _) = three(input);
+        assert_eq!(output, 161);
+
+        let input_two = fs::read_to_string("./src/aoc/data/2024_3").unwrap();
+        let (output_two, _) = three(&input_two);
+        assert_eq!(output_two, 175700056);
+    }
+
+    #[test]
+    fn part_two() {
+        let input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
+        let (_, output) = three(input);
+        assert_eq!(output, 48);
+
+        let input_two = fs::read_to_string("./src/aoc/data/2024_3").unwrap();
+        let (_, output_two) = three(&input_two);
+        println!("{output_two}")
+        // assert_eq!(output_two, 175700056);
     }
 }
