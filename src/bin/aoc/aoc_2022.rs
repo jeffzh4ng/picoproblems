@@ -79,3 +79,4 @@ mod tests_one {
         println!("{output_two}");
     }
 }
+fn main() {}

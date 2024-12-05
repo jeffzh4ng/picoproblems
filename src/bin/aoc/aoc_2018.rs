@@ -258,3 +258,80 @@ wvxyz
         // println!("{:?}", output);
     }
 }
+
+fn three(input: &str) -> usize {
+    let input = input
+        .lines()
+        .map(|l| {
+            l.split_ascii_whitespace()
+                .enumerate()
+                .filter_map(|(i, tok)| {
+                    if i != 0 && i != 1 {
+                        if i == 2 {
+                            Some(tok.chars().take(tok.len() - 1).collect::<String>())
+                        } else {
+                            Some(tok.to_string())
+                        }
+                    } else {
+                        None
+                    }
+                }) // input is regular
+                .map(|x| x)
+                .collect::<Vec<_>>()
+        })
+        .map(|l| {
+            let (pos, span) = (l.get(0).unwrap(), l.get(1).unwrap());
+            let parsed_pos = pos
+                .split(',')
+                .map(|tok| tok.parse::<i32>().unwrap())
+                .collect::<Vec<_>>();
+            let parsed_span = span
+                .split('x')
+                .map(|tok| tok.parse::<i32>().unwrap())
+                .collect::<Vec<_>>();
+
+            let parsed_pos_tup = (*parsed_pos.get(0).unwrap(), *parsed_pos.get(1).unwrap());
+            let parsed_span_tup = (*parsed_span.get(0).unwrap(), *parsed_span.get(1).unwrap());
+
+            (parsed_pos_tup, parsed_span_tup)
+        })
+        .collect::<Vec<_>>();
+
+    fn overlap(
+        (x_pos, x_span): ((i32, i32), (i32, i32)),
+        (y_pos, y_span): ((i32, i32), (i32, i32)),
+    ) -> usize {
+        let (x_top, x_right, x_bot, x_left) = (0, 0, 0, 0);
+        let (y_top, y_right, y_bot, y_left) = (0, 0, 0, 0);
+        0
+    }
+
+    let foo = input
+        .iter()
+        .enumerate()
+        .flat_map(|(i, x)| input.iter().skip(i + 1).map(move |y| (x, y)))
+        .inspect(|(&x, &y)| println!("{:?}{:?}", x, y))
+        .map(|(&x, &y)| overlap(x, y))
+        .fold(0, |p, n| p + n);
+
+    foo
+}
+
+#[cfg(test)]
+mod tests_three {
+    use std::fs;
+
+    use super::*;
+
+    #[test]
+    fn part_one() {
+        let input = "#1 @ 1,3: 4x4
+#2 @ 3,1: 4x4
+#3 @ 5,5: 2x2
+";
+        let output = three(input);
+        assert_eq!(output, 4);
+    }
+}
+
+fn main() {}

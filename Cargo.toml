@@ -3,4 +3,18 @@ name = "picoprob"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
+[[bin]]
+name = "aoc_2024"
+path = "src/bin/aoc/aoc_2024.rs"
+
+[[bin]]
+name = "aoc_2022"
+path = "src/bin/aoc/aoc_2022.rs"
+
+[[bin]]
+name = "aoc_2020"
+path = "src/bin/aoc/aoc_2020.rs"
+
+[[bin]]
+name = "aoc_2018"
+path = "src/bin/aoc/aoc_2018.rs"

@@ -1,11 +1,11 @@
 use core::str;
 use std::{
     cmp::{self, Reverse},
-    collections::{BinaryHeap, HashMap},
+    collections::{BinaryHeap, HashMap, HashSet},
     io, iter,
 };
 
-pub fn one(input: &str) -> (i128, i128) {
+fn one(input: &str) -> (i128, i128) {
     let (lh, rh, lv, rhm) = input
         .split('\n')
         .filter(|line| !line.is_empty())
@@ -94,7 +94,7 @@ mod tests {
     }
 }
 
-pub fn two(input: &str) -> (usize, usize) {
+fn two(input: &str) -> (usize, usize) {
     fn safe_window(is_asc: bool, a: &i128, b: &i128) -> bool {
         let direction_ok = (is_asc && a < b) || (!is_asc && a > b);
         let difference_ok = 1 <= (b - a).abs() && (b - a).abs() <= 3;
@@ -276,7 +276,7 @@ struct Token {
     typ: TT,
 }
 
-pub fn three(input: &str) -> (i128, i128) {
+fn three(input: &str) -> (i128, i128) {
     // mul(X, Y)
     // X: 1-3 digits
     // Y: 1-3 digits
@@ -489,7 +489,7 @@ mod tests_three {
     }
 }
 
-pub fn four(input: &str) -> (usize, usize) {
+fn four(input: &str) -> (usize, usize) {
     fn file_hit(
         haystack: &Vec<Vec<char>>,
         needle: &[char],
@@ -642,3 +642,105 @@ MXMXAXMASX
         assert_eq!(output_two, 1940);
     }
 }
+
+// fn five(input: &str) -> i32 {
+//     let input = input.split("\n\n").collect::<Vec<_>>();
+//     let (order, update) = (input[0], input[1]);
+//     let graph = order
+//         .lines()
+//         .map(|l| {
+//             let bar = l.split('|').collect::<Vec<_>>();
+//             (
+//                 bar[0].parse::<i32>().unwrap(),
+//                 bar[1].parse::<i32>().unwrap(),
+//             )
+//         })
+//         .fold(HashMap::new(), |mut p, (u, v)| {
+//             p.entry(u)
+//                 .and_modify(|edges: &mut HashSet<i32>| {
+//                     edges.insert(v);
+//                 })
+//                 .or_insert(HashSet::from([v]));
+//             p
+//         });
+
+//     // blunder 1: recover total order with grand_children.len()
+//     // blunder 2: recover total order with grand_children.contains()
+//     // idea 3: partial order with toposort
+
+//     let sum = update
+//         .lines()
+//         .map(|l| l.split(',').map(|tok| tok.parse::<i32>().unwrap()))
+//         .map(|update| {
+//             let update = update.collect::<Vec<_>>();
+//             let valid = update.iter().try_fold(None, |p, v| match p {
+//                 Some(u) => {
+//                     if total_order.get(u).or(Some(&-1)) < total_order.get(v).or(Some(&-1)) {
+//                         Err(io::Error::new(
+//                             io::ErrorKind::InvalidData,
+//                             "picoprob: invalid data",
+//                         ))
+//                     } else {
+//                         Ok(Some(v))
+//                     }
+//                 }
+//                 None => Ok(Some(v)),
+//             });
+
+//             (valid.is_ok(), update)
+//         })
+//         // .inspect(|x| println!("{:?}", x))
+//         .filter_map(|(valid, update)| if valid { Some(update) } else { None })
+//         .map(|update| update[update.len() / 2])
+//         // .inspect(|x| println!("{:?}", x))
+//         .sum();
+
+//     sum
+// }
+
+// #[cfg(test)]
+// mod tests_five {
+//     use std::fs;
+
+//     use super::*;
+
+//     #[test]
+//     fn part_one() {
+//         let input = "47|53
+// 97|13
+// 97|61
+// 97|47
+// 75|29
+// 61|13
+// 75|53
+// 29|13
+// 97|29
+// 53|29
+// 61|53
+// 97|53
+// 61|29
+// 47|13
+// 75|47
+// 97|75
+// 47|61
+// 75|61
+// 47|29
+// 75|13
+// 53|13
+
+// 75,47,61,53,29
+// 97,61,53,29,13
+// 75,29,13
+// 75,97,47,61,53
+// 61,13,29
+// 97,13,75,29,47
+// ";
+//         let output = five(input);
+//         assert_eq!(output, 143);
+
+//         let input = fs::read_to_string("./src/aoc/data/2024_5").unwrap();
+//         let output = five(&input);
+//         println!("{:?}", output); // 7643 too high
+//     }
+// }
+fn main() {}
