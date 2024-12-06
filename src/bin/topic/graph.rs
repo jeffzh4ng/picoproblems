@@ -1,8 +1,17 @@
-// 1. traverals
-// - connected components, strongly connected components
-// - articulation points, bridges
+// 1. traverals:
+// - cc/scc/ff
+// - aps/bridges
 
 use std::io;
+
+fn main() {
+    let input = io::read_to_string(io::stdin()).unwrap();
+    let output = kattis_wheresmyinternet(&input);
+    match output {
+        Some(cc_flattened) => cc_flattened.iter().for_each(|v| println!("{v}")),
+        None => println!("Connected"),
+    }
+}
 
 // rust: .take()/.skip() for filter, .nth() for selection
 fn kattis_wheresmyinternet(input: &str) -> Option<Vec<usize>> {
@@ -45,7 +54,7 @@ fn kattis_wheresmyinternet(input: &str) -> Option<Vec<usize>> {
         }
     }
 
-    let (ccs, _) = (1..V).fold(
+    let (ccs, _) = (1..=V).fold(
         (Vec::new(), vec![false; V + 1]),
         |(mut ccs, mut seen), v| {
             if !seen[v] {
@@ -71,16 +80,64 @@ fn kattis_wheresmyinternet(input: &str) -> Option<Vec<usize>> {
     }
 }
 
-fn main() {
-    let input = io::read_to_string(io::stdin()).unwrap();
-    let output = kattis_wheresmyinternet(&input);
-    match output {
-        Some(cc_flattened) => cc_flattened.iter().for_each(|v| println!("{v}")),
-        None => println!("Connected"),
+fn kattis_dominoes2(input: &str) -> u32 {
+    let n = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    for _ in 0..n {
+        let foo = input
+            .lines()
+            .nth(1) // TODO: fix?
+            .unwrap()
+            .split(' ')
+            .map(|tok| tok.parse::<usize>().unwrap())
+            .collect::<Vec<_>>();
+
+        let (V, E, R) = (foo[0], foo[1], foo[2]);
+        let al = input
+            .lines()
+            .skip(2)
+            .take(E)
+            .map(|l| {
+                let split = l.split(' ').collect::<Vec<_>>();
+
+                (
+                    split[0].parse::<usize>().unwrap(),
+                    split[0].parse::<usize>().unwrap(),
+                )
+            })
+            .fold(vec![vec![]; V + 1], |mut p, (v, w)| {
+                p[v].push(w);
+                p[w].push(v);
+                p
+            });
+
+        fn dfs(al: &Vec<Vec<usize>>, v: usize, seen: &mut Vec<bool>, cc: &mut Vec<usize>) -> () {
+            todo!()
+        }
+        let (ccs, _) = (1..=V).fold(
+            (vec![false; V + 1], Vec::new()),
+            |(mut seen, mut ccs), v| {
+                if !seen[v] {
+                    let mut cc = Vec::new();
+                    dfs(&al, v, &mut seen, &mut cc);
+                    ccs.push(cc);
+                }
+
+                (seen, ccs)
+            },
+        );
+
+        // sum = 0
+        // read the root
+        // for cc in ccs:
+        //   if cc.contains(root)
+        //     sum += cc.len()-1
+
+        todo!()
     }
+
+    todo!();
 }
 
-// fn kattis_dominoes2(input: &str) -> () {}
 // fn kattis_reachableroads(input: &str) -> () {}
 // fn kattis_terraces(input: &str) -> () {}
 // fn kattis_cartrouble(input: &str) -> () {}
@@ -96,7 +153,7 @@ mod tests_traverals {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_wheresmyinternet() {
         let input = "6 4
 1 2
 2 3
@@ -120,19 +177,29 @@ mod tests_traverals {
         let output = kattis_wheresmyinternet(input).unwrap();
         assert_eq!(output, Vec::from([2, 3, 4]));
     }
+
+    #[test]
+    fn test_dominoes2() {
+        let input = "1
+3 2 1
+1 2
+2 3
+2
+";
+        let output = kattis_dominoes2(input);
+        assert_eq!(output, 2);
+    }
 }
 
-// - flood fill easy
-// - flood fill hard
 // - toposort
 // - bipartite cycle check
-// - articular point/bridge
-// - strongly connected components
 // - ad hoc graph traversals
 
-// 2. mst
-// 3. sssp
-// 4. apsp
-// 5. network flows
-// 6. graph matching
-// 7. np-hard/np-complete
+mod tests_mst {}
+mod tests_sssp {}
+mod tests_apsp {}
+
+// --adv
+// network flows
+// graph matching
+// np-hard/np-complete

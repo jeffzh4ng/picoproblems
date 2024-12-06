@@ -1,18 +1,1 @@
 picoprob: rust dsa to various problemsets
-
-datastructures (fuzzed+pbtd):
-- graph
-
-problemsets:
-- advent(10*25=250)
-- leetcode(169)
-- usaco(2011->2024)
-- codeforces
-- hackercup(2011->2024)
-
-usaco           cf 
----------------------
-- bronze -> 900-1500 [grey/green]
-- silver -> 1200-1900 [green/cyan]
-- gold   -> 1500-2200 [blue/purp]
-- plat   -> 1900+    [purp/orange]
