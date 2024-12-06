@@ -5,6 +5,8 @@ use std::{
     io, iter,
 };
 
+fn main() {}
+
 fn one(input: &str) -> (i128, i128) {
     let (lh, rh, lv, rhm) = input
         .split('\n')
@@ -70,7 +72,7 @@ mod tests {
         let (output, _) = one(&input);
         assert_eq!(output, 11);
 
-        let input_two = fs::read_to_string("./src/aoc/data/2024_1").unwrap();
+        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_1").unwrap();
         let (output_two, _) = one(&input_two);
         assert_eq!(output_two, 1222801);
     }
@@ -88,7 +90,7 @@ mod tests {
         let (_, output) = one(&input);
         assert_eq!(output, 31);
 
-        let input_two = fs::read_to_string("./src/aoc/data/2024_1").unwrap();
+        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_1").unwrap();
         let (_, output_two) = one(&input_two);
         assert_eq!(output_two, 22545250);
     }
@@ -225,7 +227,7 @@ mod tests_two {
         let (output, _) = two(input);
         assert_eq!(output, 2);
 
-        let input_two = fs::read_to_string("./src/aoc/data/2024_2").unwrap();
+        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_2").unwrap();
         let (output_two, _) = two(&input_two);
         assert_eq!(output_two, 218);
     }
@@ -247,7 +249,7 @@ mod tests_two {
         let (_, output_two) = two(&input_two);
         assert_eq!(output_two, 1);
 
-        let input_three = fs::read_to_string("./src/aoc/data/2024_2").unwrap();
+        let input_three = fs::read_to_string("./src/bin/aoc/data/2024_2").unwrap();
         let (_, output_three) = two(&input_three);
         println!("{output_three}");
         // assert_eq!(output_three, 218);
@@ -471,7 +473,7 @@ mod tests_three {
         let (output, _) = three(input);
         assert_eq!(output, 161);
 
-        let input_two = fs::read_to_string("./src/aoc/data/2024_3").unwrap();
+        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_3").unwrap();
         let (output_two, _) = three(&input_two);
         assert_eq!(output_two, 175700056);
     }
@@ -482,7 +484,7 @@ mod tests_three {
         let (_, output) = three(input);
         assert_eq!(output, 48);
 
-        let input_two = fs::read_to_string("./src/aoc/data/2024_3").unwrap();
+        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_3").unwrap();
         let (_, output_two) = three(&input_two);
         println!("{output_two}")
         // assert_eq!(output_two, 175700056);
@@ -615,7 +617,7 @@ MXMXAXMASX
         let (output, _) = four(input);
         assert_eq!(output, 18);
 
-        let input_two = fs::read_to_string("./src/aoc/data/2024_4").unwrap();
+        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_4").unwrap();
         let (output_two, _) = four(&input_two);
         assert_eq!(output_two, 2536);
     }
@@ -636,13 +638,14 @@ MXMXAXMASX
         let (_, output) = four(input);
         assert_eq!(output, 9);
 
-        let input_two = fs::read_to_string("./src/aoc/data/2024_4").unwrap();
+        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_4").unwrap();
         let (_, output_two) = four(&input_two);
         println!("{:?}", output_two);
         assert_eq!(output_two, 1940);
     }
 }
 
+// discussion: https://discord.com/channels/753345240529895537/1180820243380191322/1314099608653139969
 // fn five(input: &str) -> i32 {
 //     let input = input.split("\n\n").collect::<Vec<_>>();
 //     let (order, update) = (input[0], input[1]);
@@ -738,9 +741,221 @@ MXMXAXMASX
 //         let output = five(input);
 //         assert_eq!(output, 143);
 
-//         let input = fs::read_to_string("./src/aoc/data/2024_5").unwrap();
+//         let input = fs::read_to_string("./src/bin/aoc/data/2024_5").unwrap();
 //         let output = five(&input);
 //         println!("{:?}", output); // 7643 too high
 //     }
 // }
-fn main() {}
+
+#[derive(Copy, Clone, Hash, PartialEq, Eq)]
+enum Dir {
+    N,
+    S,
+    E,
+    W,
+}
+
+// disc: https://discord.com/channels/753345240529895537/1180820243380191322/1314574435230945332
+// for non-bruteforce, does my heuristic fail? compute functional state graph and decompose into trees/cycles?
+fn six(input: &str) -> (u32, u32) {
+    fn in_bounds((r, c): (usize, usize), (R, C): (usize, usize)) -> bool {
+        (r > 0 && r < R - 1) && (c > 0 && c < C - 1)
+    }
+
+    fn hit(grid: &Vec<Vec<char>>, (r, c): (usize, usize), dir: &Dir) -> bool {
+        match dir {
+            Dir::N => grid[r - 1][c] == '#',
+            Dir::S => grid[r + 1][c] == '#',
+            Dir::E => grid[r][c + 1] == '#',
+            Dir::W => grid[r][c - 1] == '#',
+        }
+    }
+
+    // try_walk: tries to walk the grid returning grid walk if successful, and errors if there's a cycle
+    fn try_walk(
+        grid: &Vec<Vec<char>>,
+        (r, c): (usize, usize),
+        dir: &Dir,
+    ) -> Result<Vec<Vec<char>>, io::Error> {
+        let mut grid = grid.clone(); // scratchpad needs deep copy
+        let (R, C) = (grid.len(), grid[0].len());
+        let (mut r, mut c) = (r, c);
+        let mut dir = *dir;
+        let mut seen = HashSet::new();
+
+        // move until hit or edge
+        while in_bounds((r, c), (R, C)) && !hit(&grid, (r, c), &dir) {
+            // cycle detection
+            if seen.contains(&(dir, r, c)) {
+                return Err(io::Error::new(io::ErrorKind::InvalidData, "cycle"));
+            } else {
+                seen.insert((dir, r, c));
+            }
+
+            grid[r][c] = 'X'; // mark
+
+            match dir {
+                // move
+                Dir::N => r -= 1,
+                Dir::S => r += 1,
+                Dir::E => c += 1,
+                Dir::W => c -= 1,
+            }
+            if in_bounds((r, c), (R, C)) && hit(&grid, (r, c), &dir) {
+                // turn right
+                match dir {
+                    Dir::N => dir = Dir::E,
+                    Dir::S => dir = Dir::W,
+                    Dir::E => dir = Dir::S,
+                    Dir::W => dir = Dir::N,
+                }
+            }
+        }
+
+        Ok(grid)
+    }
+
+    // gen_obs: generates all obstructions that produce a cycle
+    // key: for each pos in the guard walk, check if it's in the line of sight of an existing obstacle
+    fn gen_obs(grid: &Vec<Vec<char>>, (r, c): (usize, usize), dir: &Dir) -> u32 {
+        // obs_los: returns true if (r,c) is in the line of sight of an existing obstacle, false otherwise.
+        // obs_los shortcircuits, evaluating [obs_north, obs_south, obs_east, obs_west].any(|obs| obs)
+        fn obs_los(grid: &Vec<Vec<char>>, (r, c): (usize, usize)) -> bool {
+            let (R, C) = (grid.len(), grid[0].len());
+            let (ogr, ogc) = (r, c);
+
+            // north
+            let (mut r, c) = (ogr, ogc);
+            while in_bounds((r, c), (R, C)) {
+                r -= 1;
+
+                if in_bounds((r, c), (R, C)) && hit(&grid, (r, c), &Dir::N) {
+                    return true;
+                }
+            }
+            // south
+            let (mut r, c) = (ogr, ogc);
+            while in_bounds((r, c), (R, C)) {
+                r += 1;
+                if in_bounds((r, c), (R, C)) && hit(&grid, (r, c), &Dir::S) {
+                    return true;
+                }
+            }
+
+            // east
+            let (r, mut c) = (ogr, ogc);
+            while in_bounds((r, c), (R, C)) {
+                c += 1;
+                if in_bounds((r, c), (R, C)) && hit(&grid, (r, c), &Dir::E) {
+                    return true;
+                }
+            }
+            // west
+            let (r, mut c) = (ogr, ogc);
+            while in_bounds((r, c), (R, C)) {
+                c -= 1;
+                if in_bounds((r, c), (R, C)) && hit(&grid, (r, c), &Dir::W) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        let mut grid = grid.clone();
+        let (R, C) = (grid.len(), grid[0].len());
+        let (mut r, mut c) = (r, c);
+        let mut dir = *dir;
+
+        // move until hit or edge
+        let mut output = 0;
+        while in_bounds((r, c), (R, C)) && !hit(&grid, (r, c), &dir) {
+            grid[r][c] = 'X'; // mark
+
+            // check obs_los -> try_walk. something is hanging.
+            if obs_los(&grid, (r, c)) {
+                let foo = try_walk(&grid, (r, c), &dir);
+                if foo.is_err() {
+                    output += 1;
+                }
+            }
+
+            match dir {
+                // move
+                Dir::N => r -= 1,
+                Dir::S => r += 1,
+                Dir::E => c += 1,
+                Dir::W => c -= 1,
+            }
+
+            if in_bounds((r, c), (R, C)) && hit(&grid, (r, c), &dir) {
+                // turn right
+                match dir {
+                    Dir::N => dir = Dir::E,
+                    Dir::S => dir = Dir::W,
+                    Dir::E => dir = Dir::S,
+                    Dir::W => dir = Dir::N,
+                }
+            }
+        }
+
+        output
+    }
+
+    let grid = input
+        .lines()
+        .map(|l| l.chars().collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+    let dir = Dir::N;
+    let (R, C) = (grid.len(), grid[0].len());
+    let (r, c) = (0..R)
+        .flat_map(|r| (0..C).map(move |c| (r, c)))
+        .filter_map(|(r, c)| {
+            if grid[r][c] == '^' {
+                Some((r, c))
+            } else {
+                None
+            }
+        })
+        .nth(0)
+        .unwrap();
+
+    let grid_walk = try_walk(&grid, (r, c), &dir).unwrap();
+    let guard_walk = (0..R)
+        .flat_map(|r| (0..C).map(move |c| (r, c)))
+        .fold(0, |count, (r, c)| {
+            count + if grid_walk[r][c] == 'X' { 1 } else { 0 }
+        })
+        + 1; // last move isn't counted
+
+    let obs_count = gen_obs(&grid, (r, c), &dir);
+    (guard_walk, obs_count)
+}
+
+#[cfg(test)]
+mod tests_six {
+    use std::fs;
+
+    use super::*;
+
+    #[test]
+    fn part_one() {
+        let input = "....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...
+";
+        let (output, _) = six(input);
+        assert_eq!(output, 41);
+
+        let input = fs::read_to_string("./src/bin/aoc/data/2024_6").unwrap();
+        let (output, _) = six(&input);
+        assert_eq!(output, 4977);
+    }
+}
