@@ -2,18 +2,6 @@
 // - cc/scc/ff
 // - aps/bridges
 
-use std::io;
-
-fn main() {
-    let input = io::read_to_string(io::stdin()).unwrap();
-    let output = kattis_wheresmyinternet(&input);
-    if output.len() == 0 {
-        println!("Connected")
-    } else {
-        output.iter().for_each(|v| println!("{v}"));
-    }
-}
-
 // rust: .take()/.skip() for filter, .nth() for selection
 // blunder: (1..=V).fold(|v|) is not sequential??
 fn kattis_wheresmyinternet(input: &str) -> Vec<usize> {
@@ -62,73 +50,74 @@ fn kattis_wheresmyinternet(input: &str) -> Vec<usize> {
     not_seen
 }
 
-fn kattis_dominoes2(input: &str) -> u32 {
+fn kattis_dominoes2(input: &str) -> Vec<u32> {
     let n = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    let mut output = Vec::new();
+    let mut input = input.lines().skip(1);
+
     for _ in 0..n {
         let foo = input
-            .lines()
-            .nth(1) // TODO: fix?
+            .by_ref()
+            .next()
             .unwrap()
             .split(' ')
             .map(|tok| tok.parse::<usize>().unwrap())
             .collect::<Vec<_>>();
-
         let (V, E, R) = (foo[0], foo[1], foo[2]);
+
         let al = input
-            .lines()
-            .skip(2)
+            .by_ref()
             .take(E)
             .map(|l| {
                 let split = l.split(' ').collect::<Vec<_>>();
 
                 (
                     split[0].parse::<usize>().unwrap(),
-                    split[0].parse::<usize>().unwrap(),
+                    split[1].parse::<usize>().unwrap(),
                 )
             })
+            // .inspect(|x| println!("{:?}", x))
             .fold(vec![vec![]; V + 1], |mut p, (v, w)| {
+                // blunder: directed
                 p[v].push(w);
-                p[w].push(v);
                 p
             });
 
-        fn dfs(al: &Vec<Vec<usize>>, v: usize, seen: &mut Vec<bool>, cc: &mut Vec<usize>) -> () {
-            todo!()
-        }
-        let (ccs, _) = (1..=V).fold(
-            (vec![false; V + 1], Vec::new()),
-            |(mut seen, mut ccs), v| {
-                if !seen[v] {
-                    let mut cc = Vec::new();
-                    dfs(&al, v, &mut seen, &mut cc);
-                    ccs.push(cc);
+        let r = input
+            .by_ref()
+            .take(R)
+            .map(|l| l.parse::<usize>().unwrap())
+            .collect::<Vec<_>>();
+
+        fn dfs(al: &Vec<Vec<usize>>, v: usize, seen: &mut Vec<bool>) -> () {
+            seen[v] = true; // mark
+            for &w in &al[v] {
+                // if not visited, recurse
+                if !seen[w] {
+                    dfs(al, w, seen);
                 }
+            }
+        }
 
-                (seen, ccs)
-            },
-        );
+        let mut seen = vec![false; V + 1];
+        for v in r {
+            dfs(&al, v, &mut seen);
+        }
 
-        // sum = 0
-        // read the root
-        // for cc in ccs:
-        //   if cc.contains(root)
-        //     sum += cc.len()-1
-
-        todo!()
+        let knocked_over = seen.iter().fold(0, |p, &v| if v { p + 1 } else { p });
+        output.push(knocked_over);
     }
-
-    todo!();
+    output
 }
 
-// fn kattis_reachableroads(input: &str) -> () {}
-// fn kattis_terraces(input: &str) -> () {}
-// fn kattis_cartrouble(input: &str) -> () {}
-// fn kattis_daceydice(input: &str) -> () {}
-// fn kattis_foldingcube(input: &str) -> () {}
-// fn kattis_moneymatters(input: &str) -> () {}
-// fn kattis_pearwise(input: &str) -> () {}
-// fn kattis_securitybadge(input: &str) -> () {}
-// fn cses_buildingroads(input: &str) -> () {}
+use std::io;
+fn main() {
+    let input = io::read_to_string(io::stdin()).unwrap();
+    let output = kattis_dominoes2(&input);
+    for o in output {
+        println!("{o}");
+    }
+}
 
 #[cfg(test)]
 mod tests_traverals {
@@ -177,9 +166,57 @@ mod tests_traverals {
 2
 ";
         let output = kattis_dominoes2(input);
-        assert_eq!(output, 2);
+        assert_eq!(output, vec![2]);
+
+        let input = "2
+3 2 1
+1 2
+2 3
+2
+3 2 1
+1 2
+2 3
+2
+";
+        let output = kattis_dominoes2(input);
+        assert_eq!(output, vec![2, 2]);
+
+        let input = "1
+3 2 2
+1 2
+2 3
+2
+3
+";
+        let output = kattis_dominoes2(input);
+        assert_eq!(output, vec![2]);
+
+        let input = "1
+3 1 1
+1 2
+1
+";
+        let output = kattis_dominoes2(input);
+        assert_eq!(output, vec![2]);
+
+        let input = "1
+3 1 0
+1 2
+";
+        let output = kattis_dominoes2(input);
+        assert_eq!(output, vec![0]);
     }
 }
+
+// fn kattis_reachableroads(input: &str) -> () {}
+// fn kattis_terraces(input: &str) -> () {}
+// fn kattis_cartrouble(input: &str) -> () {}
+// fn kattis_daceydice(input: &str) -> () {}
+// fn kattis_foldingcube(input: &str) -> () {}
+// fn kattis_moneymatters(input: &str) -> () {}
+// fn kattis_pearwise(input: &str) -> () {}
+// fn kattis_securitybadge(input: &str) -> () {}
+// fn cses_buildingroads(input: &str) -> () {}
 
 // - toposort
 // - bipartite cycle check
