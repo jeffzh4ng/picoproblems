@@ -5,20 +5,20 @@ edition = "2021"
 
 [[bin]]
 name = "aoc_2018"
-path = "src/bin/aoc/aoc_2018.rs"
+path = "src/bin/contest/aoc_2018.rs"
 
 [[bin]]
 name = "aoc_2020"
-path = "src/bin/aoc/aoc_2020.rs"
+path = "src/bin/contest/aoc_2020.rs"
 
 [[bin]]
 name = "aoc_2022"
-path = "src/bin/aoc/aoc_2022.rs"
+path = "src/bin/contest/aoc_2022.rs"
 
 [[bin]]
 name = "aoc_2024"
-path = "src/bin/aoc/aoc_2024.rs"
+path = "src/bin/contest/aoc_2024.rs"
 
 [[bin]]
 name = "cp4ses-graph"
-path = "src/bin/cp4ses/graph.rs"
+path = "src/bin/contest/graph.rs"

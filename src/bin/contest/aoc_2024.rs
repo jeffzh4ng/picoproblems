@@ -72,7 +72,7 @@ mod tests {
         let (output, _) = one(&input);
         assert_eq!(output, 11);
 
-        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_1").unwrap();
+        let input_two = fs::read_to_string("./src/bin/contest/data/2024_1").unwrap();
         let (output_two, _) = one(&input_two);
         assert_eq!(output_two, 1222801);
     }
@@ -90,7 +90,7 @@ mod tests {
         let (_, output) = one(&input);
         assert_eq!(output, 31);
 
-        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_1").unwrap();
+        let input_two = fs::read_to_string("./src/bin/contest/data/2024_1").unwrap();
         let (_, output_two) = one(&input_two);
         assert_eq!(output_two, 22545250);
     }
@@ -227,7 +227,7 @@ mod tests_two {
         let (output, _) = two(input);
         assert_eq!(output, 2);
 
-        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_2").unwrap();
+        let input_two = fs::read_to_string("./src/bin/contest/data/2024_2").unwrap();
         let (output_two, _) = two(&input_two);
         assert_eq!(output_two, 218);
     }
@@ -249,7 +249,7 @@ mod tests_two {
         let (_, output_two) = two(&input_two);
         assert_eq!(output_two, 1);
 
-        let input_three = fs::read_to_string("./src/bin/aoc/data/2024_2").unwrap();
+        let input_three = fs::read_to_string("./src/bin/contest/data/2024_2").unwrap();
         let (_, output_three) = two(&input_three);
         println!("{output_three}");
         // assert_eq!(output_three, 218);
@@ -473,7 +473,7 @@ mod tests_three {
         let (output, _) = three(input);
         assert_eq!(output, 161);
 
-        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_3").unwrap();
+        let input_two = fs::read_to_string("./src/bin/contest/data/2024_3").unwrap();
         let (output_two, _) = three(&input_two);
         assert_eq!(output_two, 175700056);
     }
@@ -484,7 +484,7 @@ mod tests_three {
         let (_, output) = three(input);
         assert_eq!(output, 48);
 
-        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_3").unwrap();
+        let input_two = fs::read_to_string("./src/bin/contest/data/2024_3").unwrap();
         let (_, output_two) = three(&input_two);
         println!("{output_two}")
         // assert_eq!(output_two, 175700056);
@@ -617,7 +617,7 @@ MXMXAXMASX
         let (output, _) = four(input);
         assert_eq!(output, 18);
 
-        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_4").unwrap();
+        let input_two = fs::read_to_string("./src/bin/contest/data/2024_4").unwrap();
         let (output_two, _) = four(&input_two);
         assert_eq!(output_two, 2536);
     }
@@ -638,7 +638,7 @@ MXMXAXMASX
         let (_, output) = four(input);
         assert_eq!(output, 9);
 
-        let input_two = fs::read_to_string("./src/bin/aoc/data/2024_4").unwrap();
+        let input_two = fs::read_to_string("./src/bin/contest/data/2024_4").unwrap();
         let (_, output_two) = four(&input_two);
         println!("{:?}", output_two);
         assert_eq!(output_two, 1940);
@@ -741,7 +741,7 @@ MXMXAXMASX
 //         let output = five(input);
 //         assert_eq!(output, 143);
 
-//         let input = fs::read_to_string("./src/bin/aoc/data/2024_5").unwrap();
+//         let input = fs::read_to_string("./src/bin/contest/data/2024_5").unwrap();
 //         let output = five(&input);
 //         println!("{:?}", output); // 7643 too high
 //     }
@@ -954,8 +954,223 @@ mod tests_six {
         let (output, _) = six(input);
         assert_eq!(output, 41);
 
-        let input = fs::read_to_string("./src/bin/aoc/data/2024_6").unwrap();
+        let input = fs::read_to_string("./src/bin/contest/data/2024_6").unwrap();
         let (output, _) = six(&input);
         assert_eq!(output, 4977);
+    }
+}
+
+enum Op {
+    Plus,
+    Mul,
+}
+
+// part two scratch:
+
+// 156: 15 6 can be made true through a single concatenation: 15 || 6 = 156.
+// 7290: 6 8 6 15 can be made true using 6 * 8 || 6 * 15.
+// 192: 17 8 14 can be made true using 17 || 8 + 14.
+
+// obs1:
+// -> || is not an arithmetic op, this is going to affect running down total?
+//   - 156: 15 6
+//           1.+
+//           2.*
+//           3.||
+
+//                178<-(14-192)<-rec
+//               ***
+//   - 192: (17|| 8) + 14
+
+//               ***: how am i gonna apply 8 to 178 with ||?
+//                 - is || essentially another base case?
+//                 - 178||8->17 OK
+
+//            48 486    7290
+//            <- -'6' <- /15  <-gen_ops (rec)
+// 7290: ((6*8)|| 6)     * 15
+//
+
+//               *** answer: it's simply string 'subtraction. opposite of concatenation
+//               -> i over complicated it
+
+fn seven(input: &str) -> (i64, i64) {
+    // expression evaluation order is left to right
+    // eg. 3267= (81+40)*27
+    // if base case is checking total ?= 0, input needs to be in reverse
+    // if base case is checking running_sum == total, input can remain in order, and we thread through running_sum
+
+    // to return two different counts and keep both part1 and part2,
+    // i can change return type to (Result, Result).
+    // but will just hack in a flag
+    fn gen_ops(total: i64, nums: &[i64], concat_op: bool) -> Result<(), io::Error> {
+        match nums {
+            [] => {
+                if total == 0 {
+                    Ok(())
+                } else {
+                    Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "picoprob: error",
+                    ))
+                }
+            }
+            [f, r @ ..] => {
+                let total_with_sum = total - f; // subtract to run down
+                let total_with_prod = total / f; // divide to run down
+
+                let f_stringified = f.to_string();
+                let total_stringified = total.to_string();
+
+                // blunder: be careful when debugging recursion.
+                // ensure you're printing the correct line with the correct stack frame
+                // you might be logging the incorrect surface area from previous stack frame
+
+                let total_with_concat = if total_stringified.len() >= f_stringified.len() {
+                    let split =
+                        total_stringified.split_at(total_stringified.len() - f_stringified.len());
+
+                    let sliced = split.1;
+
+                    let total_with_concat = if split.0 == "" || split.0.starts_with('-') {
+                        0
+                    } else {
+                        // println!("total:{:?} f:{:?}, r:{:?}", total, f, r,);
+                        // println!("{:?}", split);
+                        split.0.parse::<i64>().unwrap()
+                    };
+
+                    if sliced == f_stringified {
+                        Ok(total_with_concat)
+                    } else {
+                        Err(io::Error::new(
+                            io::ErrorKind::InvalidData,
+                            "picoprob: error",
+                        ))
+                    }
+                } else {
+                    Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "picoprob: error",
+                    ))
+                };
+
+                // concatenation introduces another base case
+                // retro: should i have caught this through stepping?
+
+                // total: 19
+                // f: 19
+                // r: []
+                // split='19'.split(0)
+                // split.0 = ''
+                // split.1 ='19
+                // -> need to convert split.0 = '' to 0.
+                // -> to reuse the existing basecase
+
+                // even if total:19, f:17, r: [], we can convert empty to 0
+                // the sliced ?= f_stringified check will always happen first
+                // i'm just placing that guard at the callsite rather than sequentially evaluting it in the logic above.
+
+                if gen_ops(total_with_sum, r, concat_op).is_ok()
+                    || (total % f == 0 && gen_ops(total_with_prod, r, concat_op).is_ok())
+                    || (concat_op
+                        && total_with_concat.is_ok()
+                        && gen_ops(total_with_concat.unwrap(), r, concat_op).is_ok())
+                {
+                    Ok(())
+                } else {
+                    Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "picoprob: error",
+                    ))
+                }
+            }
+        }
+    }
+
+    let input = input
+        .lines()
+        .map(|l| {
+            let split = l.split(' ').collect::<Vec<_>>();
+
+            let total = split[0]
+                .chars()
+                .take(split[0].len() - 1)
+                .collect::<String>()
+                .parse::<i64>()
+                .unwrap();
+
+            let nums = split
+                .iter()
+                .skip(1)
+                .map(|&tok| tok.parse::<i64>().unwrap())
+                .rev() // reverse for gen_ops
+                .collect::<Vec<_>>();
+
+            (total, nums)
+        })
+        // .inspect(|x| println!("{:?}", x))
+        .collect::<Vec<_>>();
+
+    let output_one = input
+        .iter()
+        .filter(|&(x, y)| gen_ops(*x, y, false).is_ok())
+        // .inspect(|x| println!("{:?}", x))
+        .fold(0, |p, (n, _)| p + n);
+
+    let output_two = input
+        .iter()
+        // .take(4)
+        .filter(|&(x, y)| gen_ops(*x, y, true).is_ok())
+        // .inspect(|x| println!("{:?}", x))
+        .fold(0, |p, (n, _)| p + n);
+
+    (output_one, output_two)
+}
+
+#[cfg(test)]
+mod tests_seven {
+    use std::fs;
+
+    use super::*;
+
+    #[test]
+    fn part_one() {
+        let input = "190: 10 19
+3267: 81 40 27
+83: 17 5
+156: 15 6
+7290: 6 8 6 15
+161011: 16 10 13
+192: 17 8 14
+21037: 9 7 18 13
+292: 11 6 16 20
+";
+        let (output, _) = seven(input);
+        assert_eq!(output, 3749);
+
+        // let input = fs::read_to_string("./src/bin/contest/data/2024_7").unwrap();
+        // let (output, _) = seven(&input);
+        // assert_eq!(output, 6392012777720);
+    }
+
+    #[test]
+    fn part_two() {
+        let input = "190: 10 19
+3267: 81 40 27
+83: 17 5
+156: 15 6
+7290: 6 8 6 15
+161011: 16 10 13
+192: 17 8 14
+21037: 9 7 18 13
+292: 11 6 16 20
+";
+        let (_, output) = seven(input);
+        assert_eq!(output, 11387);
+
+        let input = fs::read_to_string("./src/bin/contest/data/2024_7").unwrap();
+        let (_, output) = seven(&input);
+        println!("{:?}", output);
     }
 }
