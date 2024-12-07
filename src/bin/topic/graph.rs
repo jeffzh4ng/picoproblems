@@ -110,15 +110,6 @@ fn kattis_dominoes2(input: &str) -> Vec<u32> {
     output
 }
 
-use std::io;
-fn main() {
-    let input = io::read_to_string(io::stdin()).unwrap();
-    let output = kattis_dominoes2(&input);
-    for o in output {
-        println!("{o}");
-    }
-}
-
 #[cfg(test)]
 mod tests_traverals {
     use super::*;
@@ -206,9 +197,86 @@ mod tests_traverals {
         let output = kattis_dominoes2(input);
         assert_eq!(output, vec![0]);
     }
+
+    #[test]
+    fn test_reachableroads() {
+        let input = "2
+5
+3
+0 1
+1 2
+3 4
+2
+1
+0 1
+";
+        let output = kattis_reachableroads(input);
+        assert_eq!(output, vec![1, 0]);
+    }
 }
 
-// fn kattis_reachableroads(input: &str) -> () {}
+fn kattis_reachableroads(input: &str) -> Vec<u32> {
+    let n = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+
+    let mut input = input.lines().skip(1);
+    let mut output = Vec::new();
+    for _ in 0..n {
+        let (V, E) = (
+            input.by_ref().next().unwrap().parse::<usize>().unwrap(),
+            input.by_ref().next().unwrap().parse::<usize>().unwrap(),
+        );
+
+        let al = input
+            .by_ref()
+            .take(E)
+            .map(|l| {
+                let split = l.split(' ').collect::<Vec<_>>();
+                (
+                    split[0].parse::<usize>().unwrap(),
+                    split[1].parse::<usize>().unwrap(),
+                )
+            })
+            .fold(vec![vec![]; V], |mut al, (v, w)| {
+                al[v].push(w);
+                al[w].push(v);
+                al
+            });
+
+        fn dfs(al: &Vec<Vec<usize>>, v: usize, seen: &mut Vec<bool>) -> () {
+            seen[v] = true; // mark
+            for &w in &al[v] {
+                if !seen[w] {
+                    // recurse on neighbors
+                    dfs(al, w, seen)
+                }
+            }
+        }
+
+        let mut seen = vec![false; V];
+        let ccs = (0..V).fold(0, |p, v| {
+            if !seen[v] {
+                dfs(&al, v, &mut seen); // visit connected component
+                p + 1
+            } else {
+                p
+            }
+        });
+
+        output.push(ccs - 1)
+    }
+
+    output
+}
+
+use std::io;
+fn main() {
+    let input = io::read_to_string(io::stdin()).unwrap();
+    let output = kattis_reachableroads(&input);
+    for o in output {
+        println!("{o}");
+    }
+}
+
 // fn kattis_terraces(input: &str) -> () {}
 // fn kattis_cartrouble(input: &str) -> () {}
 // fn kattis_daceydice(input: &str) -> () {}
