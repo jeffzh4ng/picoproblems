@@ -20,5 +20,5 @@ name = "aoc_2024"
 path = "src/bin/contest/aoc_2024.rs"
 
 [[bin]]
-name = "cp4ses-graph"
-path = "src/bin/contest/graph.rs"
+name = "topic_graph"
+path = "src/bin/topic/graph.rs"
