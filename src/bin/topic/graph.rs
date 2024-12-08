@@ -268,23 +268,16 @@ fn kattis_reachableroads(input: &str) -> Vec<u32> {
     output
 }
 
-use std::io;
-fn main() {
-    let input = io::read_to_string(io::stdin()).unwrap();
-    let output = kattis_reachableroads(&input);
-    for o in output {
-        println!("{o}");
-    }
-}
+// use std::io;
+// fn main() {
+//     let input = io::read_to_string(io::stdin()).unwrap();
+//     let output = kattis_reachableroads(&input);
+//     for o in output {
+//         println!("{o}");
+//     }
+// }
 
 // fn kattis_terraces(input: &str) -> () {}
-// fn kattis_cartrouble(input: &str) -> () {}
-// fn kattis_daceydice(input: &str) -> () {}
-// fn kattis_foldingcube(input: &str) -> () {}
-// fn kattis_moneymatters(input: &str) -> () {}
-// fn kattis_pearwise(input: &str) -> () {}
-// fn kattis_securitybadge(input: &str) -> () {}
-// fn cses_buildingroads(input: &str) -> () {}
 
 // - toposort
 // - bipartite cycle check
@@ -298,3 +291,5 @@ mod tests_apsp {}
 // network flows
 // graph matching
 // np-hard/np-complete
+
+fn main() {}

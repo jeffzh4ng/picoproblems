@@ -20,5 +20,25 @@ name = "aoc_2024"
 path = "src/bin/contest/aoc_2024.rs"
 
 [[bin]]
+name = "topic_cs"
+path = "src/bin/topic/cs.rs"
+
+[[bin]]
+name = "topic_dnc"
+path = "src/bin/topic/dnc.rs"
+
+[[bin]]
+name = "topic_greedy"
+path = "src/bin/topic/greedy.rs"
+
+[[bin]]
+name = "topic_dp"
+path = "src/bin/topic/dp.rs"
+
+[[bin]]
 name = "topic_graph"
 path = "src/bin/topic/graph.rs"
+
+[[bin]]
+name = "edu_172"
+path = "src/bin/contest/edu_172.rs"
