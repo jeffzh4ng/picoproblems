@@ -42,3 +42,7 @@ path = "src/bin/topic/graph.rs"
 [[bin]]
 name = "edu_172"
 path = "src/bin/contest/edu_172.rs"
+
+[[bin]]
+name = "edu_171"
+path = "src/bin/contest/edu_171.rs"
