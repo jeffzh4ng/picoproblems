@@ -50,3 +50,7 @@ path = "src/bin/contest/edu_171.rs"
 [[bin]]
 name = "edu_170"
 path = "src/bin/contest/edu_170.rs"
+
+[[bin]]
+name = "edu_169"
+path = "src/bin/contest/edu_169.rs"
