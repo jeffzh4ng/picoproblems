@@ -46,9 +46,15 @@
 //       -> since we're looking for two line segments that's *at least* K
 //       -> russian understanding
 
-//       8:40 blunder. when K >= |max(N,M)|
+//       8:40 blunder. when K == |max(N,M)|
 //                     then, can i just return a big cross?
 //                     nope. cause then AB|CD does not always hold (very slanted X)
+
+//                     blunder on the blunder.
+//                     K <= sqrt(min(N,M)) must hold.
+//                     why? consider if it does not.
+
+//                     fix AB. then CD will be out of bounds. why???? TODO.
 
 // 8:44 see problem tag is greedy/constructive
 //      almost got the idea.
