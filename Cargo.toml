@@ -40,8 +40,12 @@ name = "topic_graph"
 path = "src/bin/topic/graph.rs"
 
 [[bin]]
-name = "div4971"
+name = "div4_971"
 path = "src/bin/contest/div4_971.rs"
+
+[[bin]]
+name = "div4_964"
+path = "src/bin/contest/div4_964.rs"
 
 [[bin]]
 name = "edu_172"
