@@ -34,6 +34,57 @@ mod tests {
             println!("{o}");
         }
     }
+
+    #[test]
+    fn test_c() {
+        let input = "3
+9 11 3
+0 10 8
+1000000 100000 10
+";
+
+        // why is the optimal amount for tc3 199,999
+        // and not 110,000 (1,000,000/10  + 100,000/10)?
+
+        let output = c(&input);
+        for o in output {
+            println!("{o}");
+        }
+    }
+}
+
+fn c(input: &str) -> Vec<i32> {
+    let t = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    let mut input = input.lines().skip(1);
+    let mut output = Vec::new();
+
+    for _ in 0..t {
+        let parsed_input = input
+            .by_ref()
+            .next()
+            .unwrap()
+            .split(' ')
+            .map(|tok| tok.parse::<i32>().unwrap())
+            .collect::<Vec<_>>();
+
+        let (X, Y, d) = (parsed_input[0], parsed_input[1], parsed_input[2]);
+        let (mut x, mut y) = (0, 0);
+
+        let mut moves = 0;
+        while x < X || y < Y {
+            x += d;
+            moves += 1;
+
+            if x < X || y < Y {
+                y += d;
+                moves += 1;
+            }
+        }
+
+        output.push(moves)
+    }
+
+    output
 }
 
 fn b(input: &str) -> Vec<String> {
@@ -88,7 +139,7 @@ fn a(input: &str) -> Vec<i32> {
 use std::io;
 fn main() {
     let input = io::read_to_string(io::stdin()).unwrap();
-    let output = b(&input);
+    let output = c(&input);
     for o in output {
         println!("{o}");
     }
