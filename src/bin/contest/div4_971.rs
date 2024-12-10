@@ -14,6 +14,47 @@ mod tests {
             println!("{o}");
         }
     }
+
+    #[test]
+    fn test_b() {
+        let input = "3
+4
+#...
+.#..
+..#.
+...#
+2
+.#..
+.#..
+1
+...#
+";
+        let output = b(&input);
+        for o in output {
+            println!("{o}");
+        }
+    }
+}
+
+fn b(input: &str) -> Vec<String> {
+    let t = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    let mut input = input.lines().skip(1);
+    let mut output = Vec::new();
+
+    for _ in 0..t {
+        let N = input.by_ref().next().unwrap().parse::<usize>().unwrap();
+        let o = input
+            .by_ref()
+            .take(N)
+            .map(|l| l.chars().enumerate().find(|(_, c)| *c == '#').unwrap())
+            .map(|(i, _)| format!("{} ", i + 1))
+            .collect::<String>();
+
+        let o = o.chars().rev().collect::<String>();
+        output.push(o)
+    }
+
+    output
 }
 
 fn a(input: &str) -> Vec<i32> {
@@ -47,7 +88,7 @@ fn a(input: &str) -> Vec<i32> {
 use std::io;
 fn main() {
     let input = io::read_to_string(io::stdin()).unwrap();
-    let output = a(&input);
+    let output = b(&input);
     for o in output {
         println!("{o}");
     }
