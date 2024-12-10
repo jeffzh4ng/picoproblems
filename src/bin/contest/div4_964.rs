@@ -34,6 +34,89 @@ mod tests {
             println!("{o}");
         }
     }
+
+    #[test]
+    fn test_c() {
+        let input = "4
+3 3 10
+3 5
+6 8
+9 10
+3 3 10
+1 2
+3 5
+6 7
+3 3 10
+1 2
+3 5
+6 8
+3 4 10
+1 2
+6 7
+8 9
+";
+        let output = c(&input);
+        for o in output {
+            println!("{o}");
+        }
+    }
+}
+
+fn c(input: &str) -> Vec<String> {
+    let t = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    let mut input = input.lines().skip(1);
+    let mut output = Vec::new();
+
+    for _ in 0..t {
+        let parsed_spec = input
+            .by_ref()
+            .next()
+            .unwrap()
+            .split(' ')
+            .map(|c| c.parse::<usize>().unwrap())
+            .collect::<Vec<_>>();
+
+        let (n, s, m) = (parsed_spec[0], parsed_spec[1], parsed_spec[2]);
+        let mut intervals = input
+            .by_ref()
+            .take(n)
+            .map(|l| {
+                let split = l
+                    .split(' ')
+                    .map(|t| t.parse::<usize>().unwrap())
+                    .collect::<Vec<_>>();
+                (split[0], split[1])
+            })
+            // .inspect(|x| println!("{:?}", x))
+            .collect::<Vec<_>>();
+        intervals.sort_by(|(a, _), (b, _)| a.cmp(b)); // constraint: non-overlapping intervals
+
+        // blunder: assumed last interval would cover
+        let (mut i, mut j) = (0, 0);
+        let mut can_shower = false;
+        while i < m && j < intervals.len() {
+            if intervals[j].0 - i >= s {
+                can_shower = true;
+                break;
+            } else {
+                i = intervals[j].1;
+                j += 1;
+            }
+        }
+
+        // the last index update did not reach end
+        if i < m && m - i >= s {
+            can_shower = true
+        }
+
+        output.push(if can_shower {
+            "YES".to_string()
+        } else {
+            "NO".to_string()
+        });
+    }
+
+    output
 }
 
 fn b(input: &str) -> Vec<i32> {
@@ -102,7 +185,7 @@ fn a(input: &str) -> Vec<i32> {
 use std::io;
 fn main() {
     let input = io::read_to_string(io::stdin()).unwrap();
-    let output = b(&input);
+    let output = c(&input);
     for o in output {
         println!("{o}");
     }
