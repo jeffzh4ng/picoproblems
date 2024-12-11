@@ -39,17 +39,9 @@ path = "src/bin/topic/dp.rs"
 name = "topic_graph"
 path = "src/bin/topic/graph.rs"
 
-[[bin]]
-name = "div4_971"
-path = "src/bin/contest/div4_971.rs"
 
-[[bin]]
-name = "div4_964"
-path = "src/bin/contest/div4_964.rs"
 
-[[bin]]
-name = "div3991"
-path = "src/bin/contest/div3_991.rs"
+
 
 [[bin]]
 name = "edu_172"
@@ -66,3 +58,27 @@ path = "src/bin/contest/edu_170.rs"
 [[bin]]
 name = "edu_169"
 path = "src/bin/contest/edu_169.rs"
+
+
+
+
+
+[[bin]]
+name = "div3_991"
+path = "src/bin/contest/div3_991.rs"
+
+[[bin]]
+name = "div3_988"
+path = "src/bin/contest/div3_988.rs"
+
+
+
+
+
+[[bin]]
+name = "div4_971"
+path = "src/bin/contest/div4_971.rs"
+
+[[bin]]
+name = "div4_964"
+path = "src/bin/contest/div4_964.rs"
