@@ -48,6 +48,10 @@ name = "div4_964"
 path = "src/bin/contest/div4_964.rs"
 
 [[bin]]
+name = "div3991"
+path = "src/bin/contest/div3_991.rs"
+
+[[bin]]
 name = "edu_172"
 path = "src/bin/contest/edu_172.rs"
 
