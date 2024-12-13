@@ -75,6 +75,14 @@ path = "src/bin/contest/div3_988.rs"
 name = "div3_984"
 path = "src/bin/contest/div3_984.rs"
 
+[[bin]]
+name = "div3_981"
+path = "src/bin/contest/div3_981.rs"
+
+[[bin]]
+name = "div4_970"
+path = "src/bin/contest/div3_970.rs"
+
 
 
 [[bin]]
