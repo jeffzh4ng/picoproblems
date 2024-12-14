@@ -80,10 +80,12 @@ name = "div3_981"
 path = "src/bin/contest/div3_981.rs"
 
 [[bin]]
+name = "div3_966"
+path = "src/bin/contest/div3_966.rs"
+
+[[bin]]
 name = "div4_970"
 path = "src/bin/contest/div3_970.rs"
-
-
 
 [[bin]]
 name = "div4_971"
