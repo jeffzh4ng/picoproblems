@@ -117,6 +117,38 @@ fn div4_944D(input: &str) -> Vec<i32> {
     output
 }
 
+fn div4_898D(input: &str) -> Vec<i32> {
+    let t = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    let mut input = input.lines().skip(1);
+    let mut output = Vec::new();
+
+    for _ in 0..t {
+        let split = input
+            .by_ref()
+            .next()
+            .unwrap()
+            .split(' ')
+            .map(|tok| tok.parse::<usize>().unwrap())
+            .collect::<Vec<_>>();
+        let (n, k) = (split[0], split[1]);
+        let s = input.by_ref().next().unwrap().chars().collect::<Vec<_>>();
+
+        let mut i = 0;
+        let mut o = 0;
+        while i < s.len() {
+            if s[i] == 'B' {
+                o += 1;
+                i += k;
+            } else {
+                i += 1;
+            }
+        }
+        output.push(o)
+    }
+
+    output
+}
+
 use std::io;
 fn main() {
     let input = io::read_to_string(io::stdin()).unwrap();
