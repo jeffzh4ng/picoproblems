@@ -84,6 +84,39 @@ fn b(input: &str) -> Vec<String> {
     output
 }
 
+fn div4_944D(input: &str) -> Vec<i32> {
+    let t = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    let mut input = input.lines().skip(1);
+    let mut output = Vec::new();
+
+    for _ in 0..t {
+        let s = input.by_ref().next().unwrap();
+        let mut s_sorted = s.chars().collect::<Vec<_>>();
+        s_sorted.sort();
+        let s_sorted = s_sorted.iter().collect::<String>();
+
+        if s == s_sorted {
+            output.push(1)
+        } else if s.chars().rev().collect::<String>() == s_sorted {
+            output.push(2)
+        } else {
+            // contains substring '01'
+            let s = s.chars().collect::<Vec<_>>();
+            let mut count = 1;
+
+            for i in 1..s.len() {
+                if s[i] != s[i - 1] {
+                    count += 1;
+                }
+            }
+
+            output.push(count - 1)
+        }
+    }
+
+    output
+}
+
 use std::io;
 fn main() {
     let input = io::read_to_string(io::stdin()).unwrap();
