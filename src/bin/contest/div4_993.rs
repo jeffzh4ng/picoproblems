@@ -178,6 +178,46 @@ mod tests {
     }
 }
 
+fn div4_886d(input: &str) -> Vec<usize> {
+    let t = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
+    let mut input = input.lines().skip(1);
+    let mut output = Vec::new();
+
+    for _ in 0..t {
+        let split = input
+            .by_ref()
+            .next()
+            .unwrap()
+            .split(' ')
+            .map(|tok| tok.parse::<usize>().unwrap())
+            .collect::<Vec<_>>();
+        let (N, k) = (split[0], split[1]);
+        let mut ns = input
+            .by_ref()
+            .next()
+            .unwrap()
+            .split(' ')
+            .map(|tok| tok.parse::<usize>().unwrap())
+            .collect::<Vec<_>>();
+        ns.sort();
+
+        let (mut max_valid_subarray, mut valid_subarray) = (0, 1);
+        for i in 1..ns.len() {
+            if ns[i] - ns[i - 1] <= k {
+                valid_subarray += 1;
+            } else {
+                max_valid_subarray = max_valid_subarray.max(valid_subarray);
+                valid_subarray = 1;
+            }
+        }
+        max_valid_subarray = max_valid_subarray.max(valid_subarray);
+
+        output.push(ns.len() - max_valid_subarray);
+    }
+
+    output
+}
+
 fn c(input: &str) -> Vec<i32> {
     let t = input.lines().nth(0).unwrap().parse::<u32>().unwrap();
     let mut input = input.lines().skip(1);
